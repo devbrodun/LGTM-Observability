@@ -191,3 +191,44 @@ cd terraform
 terraform apply -auto-approve
 ```
 Terraform will automatically sync the directory diff and reload the systemd services with zero downtime.
+
+---
+
+## How to Tear Down & Destroy (Clean Purge)
+
+If you need to tear down the environment, decommissioning is fully automated and managed via Terraform. 
+
+To clean up all observability configurations, databases, and systemd services from the target server, run:
+```bash
+cd terraform
+terraform destroy -auto-approve
+```
+
+### What Happens on Destroy?
+Terraform triggers a remote cleanup script on the target VM that safely purges the entire stack:
+1. **Gracefully Stops and Disables Services:** Stops and disables all 10 custom systemd services (`grafana-server`, `prometheus`, `loki`, `tempo`, `node-exporter`, `blackbox-exporter`, `alertmanager`, `otel-collector`, `github-actions-exporter`, and `demo-service`).
+2. **Removes Configuration Directories:** Deletes `/etc/prometheus`, `/etc/loki`, `/etc/tempo`, `/etc/alertmanager`, `/etc/otel-collector`, `/etc/blackbox-exporter`, and `/etc/github-actions-exporter`.
+3. **Wipes Telemetry Storage (Databases):** Wipes database storage and data folders under `/var/lib/prometheus`, `/var/lib/loki`, `/var/lib/tempo`, and Grafana dashboards to guarantee a fresh slate.
+4. **Cleans Up App & Installation Files:** Deletes the `/opt/demo-service` and `/home/<user>/vuln-observability` application folders, including all active deployment logs.
+
+---
+
+## Troubleshooting & State Migration
+
+### Error: "Missing map element" (e.g., `self.triggers` lacks `vm_host` key)
+
+If you are migrating an existing deployment that was provisioned using an older version of the Terraform code, you may receive a "Missing map element" error when running `terraform destroy` or when Terraform attempts to replace resources. This happens because the older state file lacks the new connection keys (`vm_host`, `vm_user`, `ssh_private_key_path`) inside the `self.triggers` map.
+
+#### The Fix:
+You can break the state conflict and deploy dynamically by removing the old resource from your local Terraform state. This will bypass the old destroy script execution, allowing a fresh apply to safely record the correct triggers for future runs:
+
+1. **Remove the resource from your Terraform state:**
+   ```bash
+   terraform state rm null_resource.deploy_observability_stack
+   ```
+2. **Re-deploy the stack dynamically:**
+   ```bash
+   terraform apply -auto-approve
+   ```
+
+Now, the state is synced with the new dynamic parameters, and future `terraform apply` or `terraform destroy` runs will execute flawlessly!
