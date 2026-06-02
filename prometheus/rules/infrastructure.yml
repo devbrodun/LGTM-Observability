@@ -68,6 +68,6 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Server unreachable: {{ $labels.instance }}"
-          description: "Blackbox probe has been failing for {{ $labels.instance }} for more than 2 minutes. The service may be down."
+          summary: "Server unreachable: {{ if $labels.service_name }}{{ $labels.service_name }}{{ else }}{{ $labels.instance }}{{ end }}"
+          description: "Blackbox probe has been failing for {{ if $labels.service_name }}{{ $labels.service_name }} ({{ $labels.instance }}){{ else }}{{ $labels.instance }}{{ end }} for more than 2 minutes. The service may be down."
           runbook_url: "__GITHUB_REPO_URL__/blob/main/runbooks/server_down.md"

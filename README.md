@@ -26,7 +26,7 @@ Open `terraform/terraform.tfvars` and edit it.
 
 Configure the following fields:
 *   **Infrastructure Keys & Hosts:** SSH private key path, remote host IP (`vm_host`), and SSH user.
-*   **Secrets:** Slack Incoming Webhook URL and GitHub Personal Access Token (`github_pat`).
+*   **Secrets:** Slack Incoming Webhook URL, SMTP email alert credentials, and GitHub Personal Access Token (`github_pat`).
 *   **Dynamic Telemetry Domains:** The external URLs for your Grafana (`grafana_external_url`) and Prometheus (`prometheus_external_url`) consoles. Ensure these match your `vm_host` IP.
 *   **Blackbox Probe Targets:** Specify the list of HTTP (`blackbox_http_targets`) and SSL (`blackbox_ssl_targets`) endpoints to monitor.
 
@@ -72,7 +72,7 @@ Our observability platform leverages a unified, high-performance Ubuntu instance
         │        │                              │  Alert Rules)
         ▼        ▼                              ▼
  ┌──────┴───┐┌───┴──────┐            ┌──────────┴─────────┐            ┌──────────────────────┐
- │  TEMPO   ││   LOKI   │            │   ALERTMANAGER     ├───────────►│    SLACK CHANNEL     │
+ │  TEMPO   ││   LOKI   │            │   ALERTMANAGER     ├───────────►│ SLACK + EMAIL ALERTS │
  │ (Traces) ││ (Logs)   │            └────────────────────┘            │   (#DevOps-Alerts)   │
  └──────┬───┘└───┬──────┘                                              └──────────────────────┘
         │        │
@@ -98,7 +98,7 @@ Our observability platform leverages a unified, high-performance Ubuntu instance
 
 3. **Visualization & Alerting Layer**
    * **Grafana**: The single plane of glass. Grafana integrates all three telemetry pillars, enabling engineers to click on a CPU or latency spike, pull the correlated Loki logs, and click a log trace ID to instantly trace the transaction in Tempo.
-   * **Alertmanager**: Evaluates active alerts from Prometheus, de-duplicates noise, handles inhibition rules, and delivers formatted alerts to Slack.
+   * **Alertmanager**: Evaluates active alerts from Prometheus, de-duplicates noise, handles inhibition rules, and delivers formatted firing/resolved alerts to Slack and email.
 
 ---
 
@@ -110,7 +110,7 @@ Our observability platform leverages a unified, high-performance Ubuntu instance
 | Grafana | Unified observability UI | 3000 |
 | Node Exporter | System metrics | 9100 |
 | Blackbox Exporter | HTTP/SSL probing | 9115 |
-| Alertmanager | Alert routing & Slack delivery | 9093 |
+| Alertmanager | Alert routing plus Slack/email delivery | 9093 |
 | OTel Collector | Traces + logs pipeline | 4317/4318 |
 | Demo Service | OTel-instrumented Flask app | 5000 |
 | GitHub Actions Exporter | DORA metrics source | 9999 |

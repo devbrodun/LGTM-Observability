@@ -11,6 +11,7 @@
 *Alert:* {{ .Labels.alertname }}
 *Status:* {{ if eq .Status "firing" }}🔥 Firing{{ else }}✅ Resolved{{ end }}
 *Severity:* {{ if eq .Labels.severity "critical" }}🔴 CRITICAL{{ else if eq .Labels.severity "warning" }}⚠️ WARNING{{ else }}{{ .Labels.severity }}{{ end }}
+*Affected Service:* {{ if .Labels.service_name }}{{ .Labels.service_name }}{{ else if .Labels.service }}{{ .Labels.service }}{{ else if .Labels.job }}{{ .Labels.job }}{{ else }}N/A{{ end }}
 *Host:* {{ if .Labels.instance }}{{ .Labels.instance }}{{ else }}N/A{{ end }}
 *Summary:* {{ .Annotations.summary }}
 *Current Metric Value:* {{ .Annotations.description }}

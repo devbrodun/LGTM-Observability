@@ -10,6 +10,13 @@ slack_bot_name          = "vuln-bot"
 grafana_external_url    = "http://3.219.30.122:3000"
 prometheus_external_url = "http://3.219.30.122:9090"
 
+# Email alerting for the same alerts sent to Slack:
+alert_email_to          = "alice@example.com,bob@example.com"
+smtp_smarthost          = "smtp.gmail.com:587"
+smtp_from               = "alerts@example.com"
+smtp_username           = "alerts@example.com"
+smtp_password           = "your_smtp_or_app_password_here"
+
 # Target probing endpoints for the Blackbox Exporter:
 blackbox_http_targets   = [
   "https://vuln-watch.hng14.com",

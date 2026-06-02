@@ -40,6 +40,11 @@ REPO_DIR=$(pwd)
 
 SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/PLACEHOLDER}
 SLACK_BOT_NAME=${SLACK_BOT_NAME:-vuln-bot}
+ALERT_EMAIL_TO=${ALERT_EMAIL_TO:-alerts@example.com}
+SMTP_SMARTHOST=${SMTP_SMARTHOST:-smtp.example.com:587}
+SMTP_FROM=${SMTP_FROM:-alerts@example.com}
+SMTP_USERNAME=${SMTP_USERNAME:-alerts@example.com}
+SMTP_PASSWORD=${SMTP_PASSWORD:-placeholder_password}
 GITHUB_PAT=${GITHUB_PAT:-placeholder_token}
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-}
 GITHUB_REPO_URL=${GITHUB_REPO_URL:-}
@@ -361,7 +366,13 @@ progress "Substituting environment variables"
 
 sed -i "s|https://hooks.slack.com/services/PLACEHOLDER|${SLACK_WEBHOOK_URL}|g" /etc/alertmanager/alertmanager.yml
 sed -i "s|__SLACK_BOT_NAME__|${SLACK_BOT_NAME}|g" /etc/alertmanager/alertmanager.yml
+sed -i "s|__ALERT_EMAIL_TO__|${ALERT_EMAIL_TO}|g" /etc/alertmanager/alertmanager.yml
+sed -i "s|__SMTP_SMARTHOST__|${SMTP_SMARTHOST}|g" /etc/alertmanager/alertmanager.yml
+sed -i "s|__SMTP_FROM__|${SMTP_FROM}|g" /etc/alertmanager/alertmanager.yml
+sed -i "s|__SMTP_USERNAME__|${SMTP_USERNAME}|g" /etc/alertmanager/alertmanager.yml
+sed -i "s|__SMTP_PASSWORD__|${SMTP_PASSWORD}|g" /etc/alertmanager/alertmanager.yml
 sed -i "s|__GRAFANA_EXTERNAL_URL__|${GRAFANA_EXTERNAL_URL}|g" /etc/alertmanager/templates/slack.tmpl
+sed -i "s|__GRAFANA_EXTERNAL_URL__|${GRAFANA_EXTERNAL_URL}|g" /etc/alertmanager/templates/email.tmpl
 sed -i "s|__ALERTMANAGER_EXTERNAL_URL__|${ALERTMANAGER_EXTERNAL_URL}|g" /etc/alertmanager/alertmanager.yml
 sed -i "s|__GITHUB_REPO_URL__|${GITHUB_REPO_URL}|g" /etc/prometheus/rules/*.yml
 sed -i "s|__VM_HOST__|${VM_HOST}|g" /etc/prometheus/prometheus.yml
@@ -409,6 +420,7 @@ if [ -n "${VM_HOST}" ]; then
   echo "==> Rewriting hardcoded host references to VM_HOST=${VM_HOST}..."
   sed -i "s|3\.219\.30\.122|${VM_HOST}|g; s|3\.239\.26\.39|${VM_HOST}|g" /etc/alertmanager/alertmanager.yml || true
   sed -i "s|3\.219\.30\.122|${VM_HOST}|g; s|3\.239\.26\.39|${VM_HOST}|g" /etc/alertmanager/templates/slack.tmpl || true
+  sed -i "s|3\.219\.30\.122|${VM_HOST}|g; s|3\.239\.26\.39|${VM_HOST}|g" /etc/alertmanager/templates/email.tmpl || true
 fi
 
 # ============================================================================

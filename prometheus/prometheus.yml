@@ -48,6 +48,22 @@ scrape_configs:
         target_label: __param_target
       - source_labels: [__param_target]
         target_label: instance
+      - source_labels: [__param_target]
+        regex: "https?://vuln-watch\\.hng14\\.com.*"
+        target_label: service_name
+        replacement: "vuln-watch frontend production"
+      - source_labels: [__param_target]
+        regex: "https?://staging\\.vuln-watch\\.hng14\\.com.*"
+        target_label: service_name
+        replacement: "vuln-watch frontend staging"
+      - source_labels: [__param_target]
+        regex: "https?://api\\.vuln-watch\\.hng14\\.com.*"
+        target_label: service_name
+        replacement: "vuln-watch backend production"
+      - source_labels: [__param_target]
+        regex: "https?://(api-staging|staging-api)\\.vuln-watch\\.hng14\\.com.*"
+        target_label: service_name
+        replacement: "vuln-watch backend staging"
       - target_label: __address__
         replacement: localhost:9115
 

@@ -32,6 +32,33 @@ variable "slack_bot_name" {
   description = "Display name for Slack alerts bot in Alertmanager notifications"
 }
 
+variable "alert_email_to" {
+  type        = string
+  description = "Comma-separated email recipients for Alertmanager notifications"
+}
+
+variable "smtp_smarthost" {
+  type        = string
+  description = "SMTP host and port for Alertmanager, e.g. smtp.gmail.com:587"
+}
+
+variable "smtp_from" {
+  type        = string
+  description = "Sender email address for Alertmanager notifications"
+}
+
+variable "smtp_username" {
+  type        = string
+  description = "SMTP username for Alertmanager authentication"
+  sensitive   = true
+}
+
+variable "smtp_password" {
+  type        = string
+  description = "SMTP password or app password for Alertmanager authentication"
+  sensitive   = true
+}
+
 variable "github_pat" {
   type        = string
   description = "GitHub Personal Access Token with repo and workflow scopes"

@@ -1,0 +1,26 @@
+{{ define "email.vuln.subject" -}}
+Vuln-Watch - {{ if eq .Status "firing" }}FIRING{{ else }}RESOLVED{{ end }} [{{ .Alerts | len }}] {{ if .CommonLabels.service_name }}{{ .CommonLabels.service_name }} - {{ end }}{{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}
+{{- end }}
+
+{{ define "email.vuln.html" -}}
+<h2> Vuln-Watch - {{ if eq .Status "firing" }}FIRING{{ else }}RESOLVED{{ end }}: {{ .CommonLabels.alertname }}</h2>
+<p><strong>Alert Count:</strong> {{ .Alerts | len }}</p>
+{{ range .Alerts }}
+<hr>
+<p><strong>Alert:</strong> {{ .Labels.alertname }}</p>
+<p><strong>Status:</strong> {{ if eq .Status "firing" }}Firing{{ else }}Resolved{{ end }}</p>
+<p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+<p><strong>Affected Service:</strong> {{ if .Labels.service_name }}{{ .Labels.service_name }}{{ else if .Labels.service }}{{ .Labels.service }}{{ else if .Labels.job }}{{ .Labels.job }}{{ else }}N/A{{ end }}</p>
+<p><strong>Host:</strong> {{ if .Labels.instance }}{{ .Labels.instance }}{{ else }}N/A{{ end }}</p>
+<p><strong>Job:</strong> {{ if .Labels.job }}{{ .Labels.job }}{{ else }}N/A{{ end }}</p>
+<p><strong>Summary:</strong> {{ .Annotations.summary }}</p>
+<p><strong>Current Metric Value:</strong> {{ .Annotations.description }}</p>
+<p><strong>Started At:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}</p>
+{{ if eq .Status "resolved" }}<p><strong>Resolved At:</strong> {{ .EndsAt.Format "2006-01-02 15:04:05 UTC" }}</p>{{ end }}
+{{ if .Annotations.runbook_url }}<p><strong>Runbook:</strong> <a href="{{ .Annotations.runbook_url }}">View Incident Runbook</a></p>{{ end }}
+<p><strong>Grafana Dashboard:</strong>
+{{ if eq .Labels.alertname "ServerDown" }}<a href="__GRAFANA_EXTERNAL_URL__/d/blackbox/blackbox-exporter">Blackbox Exporter Dashboard</a>{{ else if or (eq .Labels.alertname "SLOFastBurn") (eq .Labels.alertname "SLOSlowBurn") }}<a href="__GRAFANA_EXTERNAL_URL__/d/slo/slo-and-error-budgets">SLO &amp; Error Budget Dashboard</a>{{ else if or (eq .Labels.alertname "CFRThresholdExceeded") (eq .Labels.alertname "MTTRExceeded") }}<a href="__GRAFANA_EXTERNAL_URL__/d/dora/dora-metrics">DORA Metrics Dashboard</a>{{ else }}<a href="__GRAFANA_EXTERNAL_URL__/d/node/node-exporter">Node Exporter Dashboard</a>{{ end }}
+</p>
+{{ if .GeneratorURL }}<p><strong>Source Metric:</strong> <a href="{{ .GeneratorURL }}">View in Prometheus</a></p>{{ end }}
+{{ end }}
+{{- end }}

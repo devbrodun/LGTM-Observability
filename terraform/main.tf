@@ -22,18 +22,23 @@ terraform {
 resource "null_resource" "deploy_observability_stack" {
 
   triggers = {
-    install_hash           = filemd5("${path.root}/../systemd/install.sh")
-    github_repository_hash = var.github_repository
-    github_pat_hash        = var.github_pat
-    slack_webhook_url_hash = var.slack_webhook_url
-    slack_bot_name         = var.slack_bot_name
-    grafana_external_url   = var.grafana_external_url
+    install_hash            = filemd5("${path.root}/../systemd/install.sh")
+    github_repository_hash  = var.github_repository
+    github_pat_hash         = var.github_pat
+    slack_webhook_url_hash  = var.slack_webhook_url
+    slack_bot_name          = var.slack_bot_name
+    alert_email_to_hash     = var.alert_email_to
+    smtp_smarthost_hash     = var.smtp_smarthost
+    smtp_from_hash          = var.smtp_from
+    smtp_username_hash      = var.smtp_username
+    smtp_password_hash      = var.smtp_password
+    grafana_external_url    = var.grafana_external_url
     prometheus_external_url = var.prometheus_external_url
-    blackbox_http_targets  = join(",", var.blackbox_http_targets)
-    blackbox_ssl_targets   = join(",", var.blackbox_ssl_targets)
-    vm_host                = var.vm_host
-    vm_user                = var.vm_user
-    ssh_private_key_path   = var.ssh_private_key_path
+    blackbox_http_targets   = join(",", var.blackbox_http_targets)
+    blackbox_ssl_targets    = join(",", var.blackbox_ssl_targets)
+    vm_host                 = var.vm_host
+    vm_user                 = var.vm_user
+    ssh_private_key_path    = var.ssh_private_key_path
   }
 
   # ── Step 1: Package and scp the repo to the VM (runs on your Windows machine)
@@ -91,7 +96,7 @@ resource "null_resource" "deploy_observability_stack" {
       "find /home/${var.vm_user}/vuln-observability -type f \\( -name '*.sh' -o -name '*.service' -o -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 sed -i 's/\\r$//'",
       "find /home/${var.vm_user}/vuln-observability -type f -name '*.sh' -print0 | xargs -0 sed -i '1s/^\\xEF\\xBB\\xBF//'",
       "chmod +x /home/${var.vm_user}/vuln-observability/systemd/install.sh",
-      "echo '==> Running stack installer (max 30 minutes)...' && cd /home/${var.vm_user}/vuln-observability && sudo -E env VM_HOST='${var.vm_host}' SLACK_WEBHOOK_URL='${var.slack_webhook_url}' SLACK_BOT_NAME='${var.slack_bot_name}' GITHUB_PAT='${var.github_pat}' GITHUB_REPOSITORY='${var.github_repository}' GRAFANA_EXTERNAL_URL='${var.grafana_external_url}' PROMETHEUS_EXTERNAL_URL='${var.prometheus_external_url}' ALERTMANAGER_EXTERNAL_URL='http://${var.vm_host}:9093' BLACKBOX_HTTP_TARGETS='${join(",", var.blackbox_http_targets)}' BLACKBOX_SSL_TARGETS='${join(",", var.blackbox_ssl_targets)}' timeout 1800 bash -euxo pipefail systemd/install.sh 2>&1 | tee /home/${var.vm_user}/install.log"
+      "echo '==> Running stack installer (max 30 minutes)...' && cd /home/${var.vm_user}/vuln-observability && sudo -E env VM_HOST='${var.vm_host}' SLACK_WEBHOOK_URL='${var.slack_webhook_url}' SLACK_BOT_NAME='${var.slack_bot_name}' ALERT_EMAIL_TO='${var.alert_email_to}' SMTP_SMARTHOST='${var.smtp_smarthost}' SMTP_FROM='${var.smtp_from}' SMTP_USERNAME='${var.smtp_username}' SMTP_PASSWORD='${var.smtp_password}' GITHUB_PAT='${var.github_pat}' GITHUB_REPOSITORY='${var.github_repository}' GRAFANA_EXTERNAL_URL='${var.grafana_external_url}' PROMETHEUS_EXTERNAL_URL='${var.prometheus_external_url}' ALERTMANAGER_EXTERNAL_URL='http://${var.vm_host}:9093' BLACKBOX_HTTP_TARGETS='${join(",", var.blackbox_http_targets)}' BLACKBOX_SSL_TARGETS='${join(",", var.blackbox_ssl_targets)}' timeout 1800 bash -euxo pipefail systemd/install.sh 2>&1 | tee /home/${var.vm_user}/install.log"
     ]
   }
 
